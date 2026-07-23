@@ -1,0 +1,32 @@
+# ============================================================
+# CodeBuddy Skills 仓库 —— 安全与忽略规则
+# 务必确保真实密钥永不进入 git
+# ============================================================
+
+# ── 密钥 / 凭据（绝不入库）──
+# 真实 API Key 存放在各 skill 的 .env 中
+.env
+.env.*
+!.env.example
+
+# 美团组织券 skill：scripts/config.json 内含写死的 subChannelCode（渠道标识）
+meituan-coupon-workbuddy/scripts/config.json
+
+# ── 运行时状态 / 本地数据库 ──
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Python 缓存 ──
+__pycache__/
+*.pyc
+*.pyo
+
+# ── 生成物（报告输出，非源码）──
+skills/*/reports/
+
+# ── 操作系统 / 编辑器杂项 ──
+.DS_Store
+*.swp
+.idea/
+.vscode/

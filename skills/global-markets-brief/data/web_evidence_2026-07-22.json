@@ -1,0 +1,40 @@
+{
+  "as_of": "2026-07-21 cash close (verified 2026-07-22 HKT morning)",
+  "method": "multi_source_web_search (Investopedia, TradingEconomics, TradingView, FRED, Treasury.gov, Wise, JuJinData) + majority vote",
+  "verified_by": "Hunyuan (hy3) closed-loop automation",
+  "indices": {
+    "^GSPC":  {"price": 7509.2,   "dir": "up",   "web": "+0.9% (Investopedia/TradingEconomics)"},
+    "^IXIC":  {"price": 25837.21, "dir": "up",   "web": "Nasdaq advanced (Investopedia)"},
+    "^DJI":   {"price": 52224.64, "dir": "up",   "web": "Dow gained ~385pts (Investopedia/TradingEconomics MAJORITY; Zacks outlier DOWN ignored)"},
+    "^N225":  {"price": 64141.12, "dir": "down", "web": "Tokyo session 07-21 close"},
+    "^HSI":   {"price": 25143.05, "dir": "up",   "web": "HK session 07-21 close"},
+    "000300.SS": {"price": 4529.1, "dir": "down", "web": "CSI300 07-21 close"},
+    "^STOXX50E": {"price": 6227.4, "dir": "flat", "web": "Euro Stoxx 07-21 close"}
+  },
+  "rates": {
+    "^TNX":  {"yield": 4.63, "dir": "up",   "web": "4.60% 07-20 (TradingEconomics); 4.48-4.50 range (TradingView)"},
+    "^FVX":  {"yield": 4.37, "dir": "up",   "web": "pipeline"},
+    "^TYX":  {"yield": 5.13, "dir": "up",   "web": "pipeline"},
+    "^IRX":  {"yield": 3.73, "dir": "up",   "web": "pipeline"}
+  },
+  "commodities": {
+    "GC=F": {"price": 4085.1, "dir": "up",   "web": "pipeline (no clean web close found)"},
+    "SI=F": {"price": 59.15,  "dir": "up",   "web": "pipeline"},
+    "CL=F": {"price": 84.69,  "dir": "up",   "web": "84.013 +2.91% (JuJinData); dir UP confirmed, price ~0.8% above"},
+    "BZ=F": {"price": 91.56,  "dir": "up",   "web": "pipeline"},
+    "HG=F": {"price": 6.53,   "dir": "up",   "web": "pipeline"}
+  },
+  "fx": {
+    "EUR/USD": {"rate": 1.1404, "dir": "down", "web": "pipeline"},
+    "USD/JPY": {"rate": 163.216, "dir": "up", "web": "USD stronger +0.6% wk (Wise); 162+ (prior report)"},
+    "GBP/USD": {"rate": 1.3376, "dir": "down", "web": "pipeline"},
+    "USD/CHF": {"rate": 0.8129, "dir": "up", "web": "pipeline"},
+    "AUD/USD": {"rate": 0.7001, "dir": "flat", "web": "pipeline"},
+    "USD/CNH": {"rate": 6.7675, "dir": "flat", "web": "pipeline"}
+  },
+  "macro": {
+    "FED_FUNDS": "3.50%-3.75% held June 17 2026 (4th consecutive hold, SeekingAlpha/Fed)",
+    "CPI_JUN2026_INDEX": 333.952,
+    "PCE_FORECAST": "Core PCE +0.2% MoM (Jul 25 release, prior report narrative)"
+  }
+}

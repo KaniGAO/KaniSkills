@@ -1,0 +1,46 @@
+name: Validate Skills
+
+on:
+  push:
+    paths:
+      - 'skills/**'
+      - '.github/workflows/validate.yml'
+  pull_request:
+    paths:
+      - 'skills/**'
+      - '.github/workflows/validate.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check SKILL.md frontmatter
+        run: |
+          python3 - <<'PY'
+          import os, sys, glob
+          ok = True
+          for skill in glob.glob('skills/*/'):
+              md = os.path.join(skill, 'SKILL.md')
+              if not os.path.isfile(md):
+                  print(f"MISSING SKILL.md: {skill}")
+                  ok = False
+                  continue
+              txt = open(md, encoding='utf-8').read()
+              if not txt.startswith('---'):
+                  print(f"NO FRONTMATTER in {md}")
+                  ok = False
+                  continue
+              fm = txt.split('---', 2)[1]
+              for field in ('name', 'description'):
+                  if field not in fm:
+                      print(f"MISSING '{field}' in {md}")
+                      ok = False
+          sys.exit(0 if ok else 1)
+          PY
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_ENABLE_UPLOAD: "false"
