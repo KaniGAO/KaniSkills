@@ -53,4 +53,4 @@ if [ -d "$REPO_ROOT/downloaded" ]; then
   rm -f "$tmp_linked"
 fi
 
-echo "完成。请重启 CodeBuddy 以重新加载法术。"
+echo "完成。请重启 CodeBuddy 以重新加载 skill。"
