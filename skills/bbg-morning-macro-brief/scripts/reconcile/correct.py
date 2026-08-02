@@ -19,20 +19,6 @@ PRICE_TOL_PCT = 0.5
 MIN_CONFIDENCE = 2
 
 
-def _dir_sign(label):
-    """把 up/down/flat 映射为符号；unknown 返回 None。"""
-    if not label:
-        return None
-    s = str(label).strip().lower()
-    if s in ("up", "▲", "+"):
-        return 1
-    if s in ("down", "▼", "-"):
-        return -1
-    if s in ("flat", "→", "range", "0"):
-        return 0
-    return None
-
-
 def _dev_pct(cur, bench):
     try:
         cur = float(cur)
@@ -84,51 +70,21 @@ def apply_evidence_corrections(market_data: dict, fx_rates: dict, economic_data:
             )
 
     # ── 外汇 ──
-    # 两类触发：
-    #   (a) 汇率价格偏离 > 阈值 → 覆盖 rate + change_pct（原有逻辑）；
-    #   (b) 【FX 方向守卫，第四道防线】汇率价格在阈内、但 pipeline 涨跌方向
-    #       与高置信证据方向相反 → 价格不动，只同步修正 change_pct，
-    #       避免出现「价格对但方向反」的 GBP/USD 类反转告警。
     ev_fx = evidence.get("fx", {})
     for pair, info in fx_rates.items():
         ev = ev_fx.get(pair)
         if not ev or ev.get("rate") is None:
             continue
-        if ev.get("confidence", 0) < MIN_CONFIDENCE:
-            continue
         cur = info.get("rate")
         dev = _dev_pct(cur, ev["rate"])
-
-        ev_dir = _dir_sign(ev.get("dir"))
-        cur_chg = info.get("change_pct")
-        try:
-            cur_chg_f = float(cur_chg) if cur_chg is not None else 0.0
-        except (TypeError, ValueError):
-            cur_chg_f = 0.0
-        dir_conflict = (
-            ev_dir is not None and ev_dir != 0 and cur_chg_f != 0
-            and (cur_chg_f > 0) != (ev_dir > 0)
-        )
-
-        price_off = dev is not None and dev > price_tol
-
-        if price_off:
-            # (a) 价格偏离超阈：覆盖 rate + change_pct
-            old_rate = info.get("rate")
-            info["rate"] = round(float(ev["rate"]), 4)
-            if ev.get("change_pct") is not None:
-                info["change_pct"] = round(float(ev["change_pct"]), 2)
-            info["source"] = "Web-verified (ECB/multi-source)"
-            corrections.append(f"fx/{pair}: {old_rate} -> {info['rate']}")
-        elif dir_conflict and ev.get("change_pct") is not None:
-            # (b) 价格在阈内但方向相反：只同步 change_pct（方向守卫）
-            old_chg = info.get("change_pct")
+        if (dev is None or dev <= price_tol) or ev.get("confidence", 0) < MIN_CONFIDENCE:
+            continue
+        old_rate = info.get("rate")
+        info["rate"] = round(float(ev["rate"]), 4)
+        if ev.get("change_pct") is not None:
             info["change_pct"] = round(float(ev["change_pct"]), 2)
-            info["source"] = "Web-verified (dir-guard)"
-            corrections.append(
-                f"fx/{pair}: 方向守卫 change_pct {old_chg}% -> {info['change_pct']}% "
-                f"(证据方向 {ev.get('dir')})"
-            )
+        info["source"] = "Web-verified (ECB/multi-source)"
+        corrections.append(f"fx/{pair}: {old_rate} -> {info['rate']}")
 
     # ── 宏观（FRED 计算值与官方网页口径偏离时，以官方口径校正）──
     ev_macro = evidence.get("macro", {})

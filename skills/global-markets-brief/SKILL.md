@@ -114,3 +114,33 @@ To test data collection only:
 cd ~/.codebuddy/skills/global-markets-brief/scripts
 python -c "from collectors.yahoo import fetch_market_data; d=fetch_market_data(); print(f'OK: {len(d)} categories')"
 ```
+
+## Self-Audit (报告自检 / Skill 反查)
+
+当你需要「检验已生成的报告写没写对、质量如何」时，用 `scripts/audit/` 子模块。
+设计原则：**确定性反查用 Python，定性评判交给 agent（按 prompt），不在 skill 内再写一套 LLM API。**
+
+### 1) 跑反查，产出 audit bundle
+```bash
+cd ~/.codebuddy/skills/global-markets-brief/scripts
+python audit/judge.py --report ../reports/global-markets-briefing-2026-07-21.docx
+# 可选：--as-of 2026-07-21  指定真值基准日（默认取文件名日期）
+# 可选：--output <dir>       指定 bundle 输出目录（默认与报告同目录）
+```
+产出（与报告同目录）：
+- `audit_bundle.json` — 结构化：被审稿件 + 独立地面真值 + 数值偏差 + 叙事正文
+- `audit_bundle.md` — 人 / agent 可读版
+
+反查逻辑（确定性，无 LLM）：
+- `report_parser.py` 解析 .docx，抽取各表数值断言与 Section 4-7 叙事正文
+- `fetch_ground_truth.py` 复用 `collectors.yahoo` 的标的映射，用 yfinance 拉取
+  **as_of 当日历史收盘**作为真值（避免用今天实时数据误判历史报告）
+- `accuracy_check.py` 逐条比报告数值 vs 真值，超容差（点位 0.5% / 涨跌幅 0.3pp）标 MISMATCH
+
+### 2) agent 做定性评判（按 prompt，不调 API）
+读取 `audit/audit_bundle.md`（或 `.json`），按 `audit/JUDGE_PROMPT.md` 的 rubric
+对报告打分（准确性 / 时效性 / 完整性 / 结构 / 来源 / 无幻觉，满分 30），输出审稿意见
+（分数表 + 关键问题清单 + PASS/NEEDS_REVISION/FAIL + 给 skill 的改进建议）。
+
+> 注意：`judge.py` 只产出 bundle，**评判由 agent 完成**——这是刻意设计：
+> agent 调用 skill 时本就是 LLM，无需在 skill 里再发起一次外部模型调用。

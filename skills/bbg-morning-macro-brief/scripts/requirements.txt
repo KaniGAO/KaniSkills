@@ -1,0 +1,5 @@
+# 全球市场日报依赖
+python-docx>=1.1.0
+yfinance>=0.2.0
+requests>=2.31.0
+python-dotenv>=1.0.0
